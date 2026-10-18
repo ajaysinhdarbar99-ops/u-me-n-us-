@@ -1,0 +1,320 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Love Heart</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@700&family=Noto+Sans+JP:wght@700&family=Noto+Sans+KR:wght@700&family=Noto+Sans+SC:wght@700&family=Noto+Sans+Devanagari:wght@700&family=Noto+Sans+Gujarati:wght@700&family=Noto+Sans+Bengali:wght@700&family=Noto+Sans+Tamil:wght@700&family=Noto+Sans+Telugu:wght@700&family=Noto+Sans+Kannada:wght@700&family=Noto+Sans+Malayalam:wght@700&family=Noto+Sans+Gurmukhi:wght@700&family=Noto+Sans+Sinhala:wght@700&family=Noto+Sans+Thai:wght@700&family=Noto+Sans+Lao:wght@700&family=Noto+Sans+Khmer:wght@700&family=Noto+Sans+Myanmar:wght@700&family=Noto+Sans+Arabic:wght@700&family=Noto+Sans+Hebrew:wght@700&family=Noto+Sans+Ethiopic:wght@700&family=Noto+Sans+Armenian:wght@700&family=Noto+Sans+Georgian:wght@700&display=swap" rel="stylesheet">
+<style>
+  :root { color-scheme: dark; }
+  html, body {
+    margin: 0;
+    height: 100%;
+    background: #000;
+    overflow: hidden;
+  }
+  canvas {
+    display: block;
+    width: 100vw;
+    height: 100vh;
+    background: #000;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+  #hint {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 9vh;
+    text-align: center;
+    color: #7a1019;
+    font: 600 14px/1.2 system-ui, sans-serif;
+    letter-spacing: 0.35em;
+    text-transform: uppercase;
+    pointer-events: none;
+    transition: opacity 0.6s ease;
+    animation: blink 1.8s ease-in-out infinite;
+  }
+  #hint.off { opacity: 0; animation: none; }
+  @keyframes blink { 50% { opacity: 0.3; } }
+</style>
+</head>
+<body>
+<canvas id="c" aria-label="Animated heart made of I love you in 100 languages"></canvas>
+<div id="hint">tap</div>
+<script>
+(function () {
+  // "I love you" in 100 different languages. Each language appears only once.
+  // Second item = Google Font family suffix ("" = Noto Sans base font).
+  const PHRASES = [
+    ["I love you", ""],
+    ["Seni seviyorum", ""],
+    ["Te amo", ""],
+    ["Je t'aime", ""],
+    ["사랑해", "KR"],
+    ["愛してる", "JP"],
+    ["我爱你", "SC"],
+    ["मैं तुमसे प्यार करता हूँ", "Devanagari"],
+    ["હું તને પ્રેમ કરું છું", "Gujarati"],
+    ["Ich liebe dich", ""],
+    ["Ti amo", ""],
+    ["Eu te amo", ""],
+    ["Я тебя люблю", ""],
+    ["Σ'αγαπώ", ""],
+    ["Ik hou van jou", ""],
+    ["Jag älskar dig", ""],
+    ["Kocham cię", ""],
+    ["Anh yêu em", ""],
+    ["Aku cinta kamu", ""],
+    ["Я тебе кохаю", ""],
+    ["ฉันรักเธอ", "Thai"],
+    ["أحبك", "Arabic"],
+    ["אני אוהב אותך", "Hebrew"],
+    ["আমি তোমাকে ভালোবাসি", "Bengali"],
+    ["நான் உன்னை காதலிக்கிறேன்", "Tamil"],
+    ["నేను నిన్ను ప్రేమిస్తున్నాను", "Telugu"],
+    ["میں تم سے محبت کرتا ہوں", "Arabic"],
+    ["دوستت دارم", "Arabic"],
+    ["Nakupenda", ""],
+    ["Mahal kita", ""],
+    ["Jeg elsker dig", ""],
+    ["Minä rakastan sinua", ""],
+    ["Szeretlek", ""],
+    ["Miluji tě", ""],
+    ["Te iubesc", ""],
+    ["Ngiyakuthanda", ""],
+    ["Mo nifẹ rẹ", ""],
+    ["እወድሃለሁ", "Ethiopic"],
+    ["Ես քեզ սիրում եմ", "Armenian"],
+    ["მიყვარხარ", "Georgian"],
+    ["ನಾನು ನಿನ್ನನ್ನು ಪ್ರೀತಿಸುತ್ತೇನೆ", "Kannada"],
+    ["ഞാൻ നിന്നെ സ്നേഹിക്കുന്നു", "Malayalam"],
+    ["ਮੈਂ ਤੈਨੂੰ ਪਿਆਰ ਕਰਦਾ ਹਾਂ", "Gurmukhi"],
+    ["मी तुझ्यावर प्रेम करतो", "Devanagari"],
+    ["म तिमीलाई माया गर्छु", "Devanagari"],
+    ["මම ඔයාට ආදරෙයි", "Sinhala"],
+    ["ကျွန်တော် မင်းကို ချစ်တယ်", "Myanmar"],
+    ["ខ្ញុំស្រលាញ់អ្នក", "Khmer"],
+    ["ຂ້ອຍຮັກເຈົ້າ", "Lao"],
+    ["Би чамд хайртай", ""],
+    ["Мен сени сүйөм", ""],
+    ["Men seni sevaman", ""],
+    ["Mən səni sevirəm", ""],
+    ["Ina sonka", ""],
+    ["Ihunanya m gị", ""],
+    ["Ndinokuda", ""],
+    ["Tiako ianao", ""],
+    ["Ég elska þig", ""],
+    ["Ma armastan sind", ""],
+    ["Es tevi mīlu", ""],
+    ["Aš tave myliu", ""],
+    ["Milujem ťa", ""],
+    ["Ljubim te", ""],
+    ["Волим те", ""],
+    ["Обичам те", ""],
+    ["Të dua", ""],
+    ["Inħobbok", ""],
+    ["Is breá liom thú", ""],
+    ["Dwi'n dy garu di", ""],
+    ["Maite zaitut", ""],
+    ["T'estimo", ""],
+    ["Quérote", ""],
+    ["Mi amas vin", ""],
+    ["Aloha wau iā ʻoe", ""],
+    ["Kei te aroha au ki a koe", ""],
+    ["Ou te alofa ia te oe", ""],
+    ["Mwen renmen ou", ""],
+    ["Aku tresno kowe", ""],
+    ["Abdi bogoh ka anjeun", ""],
+    ["Saya cintakan awak", ""],
+    ["Ez te hez dikim", ""],
+    ["Ke a o rata", ""],
+    ["Ndiyakuthanda", ""],
+    ["Ek is lief vir jou", ""],
+    ["Ech hunn dech gär", ""],
+    ["Tha gaol agam ort", ""],
+    ["Ik hâld fan dy", ""],
+    ["Те сакам", ""],
+    ["Ман туро дӯст медорам", ""],
+    ["Men seni söýýärin", ""],
+    ["زه تا سره مینه کوم", "Arabic"],
+    ["Gihigugma ko ikaw", ""],
+    ["איך האב דיך ליב", "Hebrew"],
+    ["Ndimakukonda", ""],
+    ["Ndagukunda", ""],
+    ["Waan ku jecelahay", ""],
+    ["Nalingi yo", ""],
+    ["Me dɔ wo", ""],
+    ["Bëgg naa la", ""],
+    ["Qan munanayki", ""]
+  ];
+
+  const FONT_FAMILIES = [
+    "Noto Sans", "Noto Sans JP", "Noto Sans KR", "Noto Sans SC",
+    "Noto Sans Devanagari", "Noto Sans Gujarati", "Noto Sans Bengali",
+    "Noto Sans Tamil", "Noto Sans Telugu", "Noto Sans Kannada",
+    "Noto Sans Malayalam", "Noto Sans Gurmukhi", "Noto Sans Sinhala",
+    "Noto Sans Thai", "Noto Sans Lao", "Noto Sans Khmer", "Noto Sans Myanmar",
+    "Noto Sans Arabic", "Noto Sans Hebrew", "Noto Sans Ethiopic",
+    "Noto Sans Armenian", "Noto Sans Georgian"
+  ];
+
+  const RED = [255, 46, 63];
+  const WHITE = [255, 255, 255];
+  const REVEAL_GAP = 60;    // ms between each language appearing
+  const POP_MS = 380;       // how long the text stays white after appearing
+  const FADE_MS = 260;      // smooth change from white back to red
+
+  const canvas = document.getElementById("c");
+  const ctx = canvas.getContext("2d");
+  const hint = document.getElementById("hint");
+  let DPR = 1;
+
+  // ---- Heart outline, sampled by arc length so text spaces out evenly ----
+  function heartPoint(t) {
+    return [
+      16 * Math.pow(Math.sin(t), 3),
+      13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t)
+    ];
+  }
+  const M = 4000;
+  const curve = [];
+  const cum = [0];
+  for (let i = 0; i <= M; i++) {
+    curve.push(heartPoint((2 * Math.PI * i) / M));
+    if (i > 0) {
+      const a = curve[i - 1], b = curve[i];
+      cum.push(cum[i - 1] + Math.hypot(b[0] - a[0], b[1] - a[1]));
+    }
+  }
+  const TOTAL_LEN = cum[M];
+
+  // Point at a given arc-length position
+  function pointAt(target) {
+    let j = 1;
+    while (j < M && cum[j] < target) j++;
+    const seg = cum[j] - cum[j - 1] || 1;
+    const f = (target - cum[j - 1]) / seg;
+    const a = curve[j - 1], b = curve[j];
+    return [a[0] + (b[0] - a[0]) * f, a[1] + (b[1] - a[1]) * f];
+  }
+
+  // ---- Layout: several outlines (outer to inner) so the heart looks filled ----
+  const N = PHRASES.length;
+  const layerScales = [1, 0.78, 0.56, 0.36];
+  const sumScales = layerScales.reduce((a, b) => a + b, 0);
+  const layerCounts = layerScales.map(s => Math.round((N * s) / sumScales));
+  layerCounts[layerCounts.length - 1] = N - layerCounts.slice(0, -1).reduce((a, b) => a + b, 0);
+
+  const items = [];
+  let order = 0;
+  layerScales.forEach(function (s, li) {
+    const count = layerCounts[li];
+    const offset = (li % 2) * 0.5;  // stagger layers so they interleave
+    for (let k = 0; k < count; k++) {
+      const target = ((k + offset) / count) * TOTAL_LEN;
+      const p = pointAt(target);
+      const ph = PHRASES[order];
+      items.push({
+        text: ph[0],
+        font: ph[1] ? "Noto Sans " + ph[1] : "Noto Sans",
+        x: p[0] * s,
+        y: p[1] * s,
+        s: s,
+        order: order
+      });
+      order++;
+    }
+  });
+
+  // ---- Fonts ----
+  if (document.fonts && document.fonts.load) {
+    FONT_FAMILIES.forEach(function (f) {
+      document.fonts.load('700 20px "' + f + '"').catch(function () {});
+    });
+  }
+
+  // ---- State ----
+  let started = false;
+  let t0 = 0;
+
+  function resize() {
+    DPR = Math.min(window.devicePixelRatio || 1, 2);
+    canvas.width = Math.floor(window.innerWidth * DPR);
+    canvas.height = Math.floor(window.innerHeight * DPR);
+  }
+
+  function mix(a, b, t) {
+    return [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, a[2] + (b[2] - a[2]) * t];
+  }
+
+  function rgb(c, a) {
+    return "rgba(" + Math.round(c[0]) + "," + Math.round(c[1]) + "," + Math.round(c[2]) + "," + a + ")";
+  }
+
+  function frame(now) {
+    const w = window.innerWidth;
+    const h = window.innerHeight;
+
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+    ctx.fillStyle = "#000";
+    ctx.fillRect(0, 0, w, h);
+
+    if (started) {
+      const u = Math.min((w * 0.9) / 34, (h * 0.78) / 30);
+      const elapsed = now - t0;
+      const finishAt = (N - 1) * REVEAL_GAP + POP_MS + FADE_MS;
+      // Gentle breathing once the whole heart is complete
+      const breathe = elapsed > finishAt ? 1 + 0.012 * Math.sin((elapsed - finishAt) / 650) : 1;
+
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+
+      for (let i = 0; i < items.length; i++) {
+        const it = items[i];
+        const age = now - (t0 + it.order * REVEAL_GAP);
+        if (age < 0) continue;
+
+        const inPop = age < POP_MS;
+        const pop = inPop ? 1 + 0.45 * (1 - age / POP_MS) : 1;         // quick pop when it appears
+        const m = inPop ? 0 : Math.min(1, (age - POP_MS) / FADE_MS);   // 0 = white, 1 = red
+        const col = mix(WHITE, RED, m);
+        const alpha = Math.min(1, age / 180);
+
+        // Small text on purpose, so the heart shape reads clearly
+        const sizeCss = Math.max(6, u * 0.78 * (0.8 + 0.2 * it.s)) * pop * breathe;
+        const sx = w / 2 + it.x * u * breathe;
+        const sy = h / 2 - (it.y + 2) * u * breathe;
+
+        ctx.globalAlpha = alpha;
+        ctx.font = "700 " + sizeCss + 'px "' + it.font + '", "Noto Sans", sans-serif';
+        ctx.shadowColor = rgb(col, 0.85);
+        ctx.shadowBlur = inPop ? 14 : 6;
+        ctx.fillStyle = rgb(col, 1);
+        ctx.fillText(it.text, sx, sy);
+      }
+
+      ctx.globalAlpha = 1;
+      ctx.shadowBlur = 0;
+    }
+
+    requestAnimationFrame(frame);
+  }
+
+  function start() {
+    if (started) return;
+    started = true;
+    t0 = performance.now();
+    hint.classList.add("off");
+  }
+
+  window.addEventListener("resize", resize);
+  window.addEventListener("pointerdown", start);
+  resize();
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>

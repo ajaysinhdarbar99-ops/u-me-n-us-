@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>For You</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=block" rel="stylesheet">
+<style>
+  html, body { margin: 0; height: 100%; background: #0b1226; overflow: hidden; }
+  #stage {
+    position: fixed;
+    inset: 0;
+    background: #0b1226 url("assets/last_terrace.jpg") center / cover no-repeat;
+    image-rendering: pixelated;
+    overflow: hidden;
+  }
+  #line {
+    position: absolute;
+    left: 0;
+    right: 0;
+    /* sits in the sky between the moon and the city skyline */
+    top: 22%;
+    text-align: center;
+    font-family: "Press Start 2P", monospace;
+    font-size: clamp(12px, 3.9vw, 30px);
+    line-height: 1.6;
+    color: #ffffff;
+    white-space: nowrap;
+    text-shadow:
+      -0.2vw 0 0 #ff7aa8, 0.2vw 0 0 #ff7aa8,
+      0 -0.2vw 0 #ff7aa8, 0 0.2vw 0 #ff7aa8,
+      0.4vw 0.4vw 0 #d94b7d;
+    opacity: 0;
+    animation: lineIn 1.2s steps(8, end) 0.5s forwards;
+  }
+  #line span { display: inline-block; }
+  @keyframes lineIn {
+    0%   { opacity: 0; transform: translateY(1.2vh); }
+    100% { opacity: 1; transform: translateY(0); }
+  }
+</style>
+</head>
+<body>
+<div id="stage">
+  <div id="line">FOREVER ANOKHI'S BOY</div>
+</div>
+</body>
+</html>

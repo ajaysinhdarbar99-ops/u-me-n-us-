@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Happy Anniversary</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=block" rel="stylesheet">
+<style>
+  html, body {
+    margin: 0;
+    height: 100%;
+    background: #ffd6e6;
+    overflow: hidden;
+  }
+  #poster {
+    position: fixed;
+    inset: 0;
+    background: url("assets/bg.jpg") center / cover no-repeat;
+    image-rendering: pixelated;
+    font-family: "Press Start 2P", monospace;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 5vh 0 4vh;
+    box-sizing: border-box;
+  }
+
+  /* ---- Title block: two lines ---- */
+  #title {
+    width: 100%;
+    text-align: center;
+    color: #ffffff;
+    line-height: 1.35;
+    text-shadow:
+      -0.45vw 0 0 #ff7aa8, 0.45vw 0 0 #ff7aa8,
+      0 -0.45vw 0 #ff7aa8, 0 0.45vw 0 #ff7aa8,
+      -0.45vw -0.45vw 0 #ff7aa8, 0.45vw -0.45vw 0 #ff7aa8,
+      -0.45vw 0.45vw 0 #ff7aa8, 0.45vw 0.45vw 0 #ff7aa8,
+      0.9vw 0.9vw 0 #d94b7d;
+  }
+  #title .l1 {
+    font-size: 8.4vw;
+    white-space: nowrap;
+  }
+  #title .l2 {
+    display: block;
+    font-size: 11vw;
+    margin-top: 2.2vh;
+    padding-left: 42%;
+    text-align: left;
+    white-space: nowrap;
+  }
+  #title span.ch {
+    display: inline-block;
+    opacity: 0;
+    animation:
+      letterIn 0.5s steps(4, end) forwards,
+      wave 1.6s ease-in-out infinite;
+    animation-delay: calc(var(--i) * 0.07s), calc(var(--i) * 0.07s + 0.5s);
+  }
+  #title span.space { width: 0.5em; }
+  @keyframes letterIn {
+    0%   { opacity: 0; transform: translateY(-3.5vh) scale(1.6); }
+    100% { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  @keyframes wave {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(-0.9vh); }
+  }
+  #title.glow {
+    animation: pulse 1.8s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { filter: drop-shadow(0 0 0 rgba(255, 122, 168, 0)); }
+    50%      { filter: drop-shadow(0 0 1.2vw rgba(255, 122, 168, 0.9)); }
+  }
+
+  /* ---- Couple picture below the title ---- */
+  #hug {
+    margin-top: 4vh;
+    height: 44vh;
+    max-width: 94vw;
+    object-fit: contain;
+    image-rendering: pixelated;
+    opacity: 0;
+    animation:
+      fadeIn 0.8s steps(6, end) 1.6s forwards,
+      float 3.2s ease-in-out 2.4s infinite;
+  }
+  @keyframes fadeIn { to { opacity: 1; } }
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(-1.5vh); }
+  }
+</style>
+</head>
+<body>
+<div id="poster">
+  <div id="title" aria-label="HAPPY ANNIVERSARY BACCHA">
+    <div class="l1" data-text="HAPPY ANNIVERSARY"></div>
+    <div class="l2" data-text="BACCHA"></div>
+  </div>
+  <img id="hug" src="assets/poster_hug.png" alt="">
+</div>
+<script>
+(function () {
+  const title = document.getElementById("title");
+  let i = 0;
+
+  // Build letter spans, keeping one running index so the wave flows across both lines
+  title.querySelectorAll("[data-text]").forEach(function (line) {
+    line.textContent = "";
+    line.dataset.text.split("").forEach(function (ch) {
+      const s = document.createElement("span");
+      s.style.setProperty("--i", i);
+      if (ch === " ") {
+        s.className = "space";
+        s.innerHTML = "&nbsp;";
+      } else {
+        s.className = "ch";
+        s.textContent = ch;
+      }
+      line.appendChild(s);
+      i++;
+    });
+  });
+
+  // Glow starts once the last letter has landed
+  const landAt = (i * 0.07 + 0.5) * 1000;
+  setTimeout(function () { title.classList.add("glow"); }, landAt);
+})();
+</script>
+</body>
+</html>
